@@ -17,32 +17,22 @@ package example;
 
 import org.pkl.config.java.Config;
 import org.pkl.config.java.ConfigEvaluator;
-import org.pkl.config.java.JavaType;
 
-import example.Birds.Bird;
+import org.pkl.config.java.mapper.ValueMapperBuilder;
+import org.pkl.core.Evaluator;
 import org.pkl.core.ModuleSource;
+import org.pkl.core.PModule;
 
 public class JavaCodeGeneratorExample {
   public static void main(String[] args) {
-    Config config;
-    // To learn more about the `ConfigEvaluator` API, see the `config-java` example.
-    try(var evaluator = ConfigEvaluator.preconfigured()) {
-      // "Module path" here represents Java's classpath. Since we put `config.pkl` inside the resources directory, it
-      // is available in the classpath.
-      config = evaluator.evaluate(ModuleSource.modulePath("/config.pkl"));
+    PModule config;
+    try(var evaluator = Evaluator.preconfigured()) {
+      config = evaluator.evaluate(ModuleSource.modulePath("/Repro.pkl"));
     }
 
-    // Convert entire config to an instance of the generated config class.
-    // This is the most convenient and most type-safe approach.
-    var birds = config.as(Birds.class);
-    System.out.println(birds.birds.get("Parrot"));
-
-    // only convert the `birds` mapping
-    var birdsMap = config.get("birds").as(JavaType.mapOf(String.class, Bird.class));
-    System.out.println(birdsMap.get("Parrot"));
-
-    // only convert the bird named "Parrot"
-    var parrot = config.get("birds").get("Parrot").as(Bird.class);
-    System.out.println(parrot);
+    var mapper = ValueMapperBuilder.preconfigured().build();
+    var module = config.get("list");
+    var list = mapper.map(module, Repro.As.class);
+    System.out.println(list);
   }
 }

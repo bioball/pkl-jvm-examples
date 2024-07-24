@@ -1,0 +1,22 @@
+module example.Repro
+
+abstract class A {}
+
+class B extends A {
+  foo = 1
+}
+
+class C extends A {
+  bar = 2
+}
+
+class As {
+  elements: Listing<A>
+}
+
+list: As = new {
+  elements {
+    new B {}
+    new C {}
+  }
+}

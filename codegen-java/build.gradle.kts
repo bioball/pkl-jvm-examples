@@ -31,7 +31,7 @@ dependencies {
 pkl {
   javaCodeGenerators {
     register("configClasses") {
-      sourceModules.set(files("src/main/resources/Birds.pkl"))
+      sourceModules.set(files("src/main/resources/Repro.pkl"))
       generateJavadoc.set(true)
     }
   }
