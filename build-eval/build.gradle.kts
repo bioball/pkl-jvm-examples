@@ -11,8 +11,8 @@ plugins {
 pkl {
   evaluators {
     register("runExample") {
-      sourceModules.set(files("bird.pkl"))
-      outputFile.set(file("${layout.buildDirectory.get()}/bird.yaml"))
+      sourceModules.set(fileTree(layout.projectDirectory).matching { include("*.pkl") })
+      outputFile.set(file("${layout.buildDirectory.get()}/%{moduleName}.yaml"))
       outputFormat.set("yaml")
     }
   }
