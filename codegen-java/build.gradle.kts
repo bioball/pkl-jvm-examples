@@ -1,6 +1,11 @@
+import org.pkl.core.ImportGraph
+import org.pkl.gradle.task.AnalyzeImportsTask
+import org.pkl.gradle.task.JavaCodeGenTask
+import kotlin.io.path.readText
+
 plugins {
   // apply the Pkl plugin
-  id("org.pkl-lang") version("0.30.0")
+  id("org.pkl-lang") version ("0.30.0")
   // if the `idea` plugin is applied, the Pkl plugin makes generated code visible to IntelliJ IDEA
   idea
   `java-library`
@@ -31,8 +36,15 @@ dependencies {
 pkl {
   javaCodeGenerators {
     register("configClasses") {
-      sourceModules.set(files("src/main/resources/Birds.pkl"))
+      // rest of this task is configured down below
       generateJavadoc.set(true)
+    }
+  }
+  analyzers.imports {
+    register("birdsImports") {
+      sourceModules.set(files("src/main/resources/Birds.pkl"))
+      outputFile = layout.buildDirectory.file("pkl/birdsImports.json")
+      outputFormat = "json"
     }
   }
   evaluators {
@@ -44,7 +56,19 @@ pkl {
     register("testPklConfig") {
       sourceModules.set(files("src/main/resources/config.pkl"))
       modulePath.from(sourceSets.main.get().runtimeClasspath)
-      outputFile.set(file("${layout.buildDirectory.get()}/tesetPklConfig/config"))
+      outputFile.set(file("${layout.buildDirectory.get()}/testPklConfig/config"))
+    }
+  }
+}
+
+val configClasses by tasks.existing(JavaCodeGenTask::class) {
+  val birdsImportsTask = tasks.named("birdsImports", AnalyzeImportsTask::class)
+  dependsOn(birdsImportsTask)
+  sourceModules = birdsImportsTask.map { task ->
+    val outputPath = task.outputFile.get().asFile.toPath()
+    val importGraph = ImportGraph.parseFromJson(outputPath.readText())
+    importGraph.resolvedImports.values.filter { uri ->
+      uri.scheme == "file" || uri.scheme == "package"
     }
   }
 }

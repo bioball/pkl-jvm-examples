@@ -1,0 +1,3 @@
+module example.Fruit
+
+name: String
